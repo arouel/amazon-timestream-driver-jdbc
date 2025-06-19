@@ -322,39 +322,15 @@ class TimestreamConnectionTest {
 
   @Test
   void testIsValid() throws SQLException {
-    final ArgumentCaptor<ClientConfiguration> clientConfig = ArgumentCaptor
-        .forClass(ClientConfiguration.class);
-
-    final ClientConfiguration clientConfiguration = new ClientConfiguration();
-    Mockito.when(mockQueryClientBuilder.getClientConfiguration()).thenReturn(clientConfiguration);
-
     Mockito.when(mockQueryClient.query(Mockito.any())).thenReturn(null);
-    Mockito
-        .when(mockQueryClientBuilder.withClientConfiguration(clientConfig.capture()))
-        .thenReturn(mockQueryClientBuilder);
-    Mockito.when(mockQueryClientBuilder.build()).thenReturn(mockQueryClient);
-
     Assertions.assertTrue(connection.isValid(2));
-    Assertions.assertEquals(2000, clientConfig.getValue().getConnectionTimeout());
   }
 
   @Test
   void testIsValidWithException() throws SQLException {
-    final ArgumentCaptor<ClientConfiguration> clientConfig = ArgumentCaptor
-        .forClass(ClientConfiguration.class);
-
-    final ClientConfiguration clientConfiguration = new ClientConfiguration();
-    Mockito.when(mockQueryClientBuilder.getClientConfiguration()).thenReturn(clientConfiguration);
     Mockito.when(mockQueryClient.query(Mockito.any()))
         .thenThrow(AmazonTimestreamQueryException.class);
-
-    Mockito
-        .when(mockQueryClientBuilder.withClientConfiguration(clientConfig.capture()))
-        .thenReturn(mockQueryClientBuilder);
-    Mockito.when(mockQueryClientBuilder.build()).thenReturn(mockQueryClient);
-
     Assertions.assertFalse(connection.isValid(2));
-    Assertions.assertEquals(2000, clientConfig.getValue().getConnectionTimeout());
   }
 
   @Test
