@@ -67,6 +67,7 @@ public class TimestreamConnection implements java.sql.Connection {
   private final AtomicBoolean isClosed = new AtomicBoolean(false);
   private final TimestreamDatabaseMetaData databaseMetaData;
   private final Properties connectionProperties;
+  private final boolean endpointDiscoveryEnabled;
   private boolean metadataPreparedStatementEnabled = Boolean.parseBoolean(
       TimestreamConnectionProperty.ENABLE_METADATA_PREPARED_STATEMENT.getDefaultValue());
   private SQLWarning warnings;
@@ -107,6 +108,7 @@ public class TimestreamConnection implements java.sql.Connection {
     this.clientConfiguration = clientConfiguration;
     initializeClients(info, httpClient);
     databaseMetaData = new TimestreamDatabaseMetaData(this);
+    endpointDiscoveryEnabled = Boolean.parseBoolean(info.getProperty("enableEndpointDiscovery", "true"));
   }
 
   @Override
@@ -570,6 +572,12 @@ public class TimestreamConnection implements java.sql.Connection {
       .withClientConfiguration(
         new ClientConfiguration(this.queryClientBuilder.getClientConfiguration()));
 
+    if (endpointDiscoveryEnabled) {
+      queryClientBuilder.enableEndpointDiscovery();
+    } else {
+      queryClientBuilder.disableEndpointDiscovery();
+    }
+
     final String region = this.queryClientBuilder.getRegion();
     if (region != null) {
       client.setRegion(region);
@@ -617,6 +625,12 @@ public class TimestreamConnection implements java.sql.Connection {
     this.queryClientBuilder = AmazonTimestreamQueryClient
       .builder()
       .withClientConfiguration(this.clientConfiguration);
+
+    if (endpointDiscoveryEnabled) {
+      queryClientBuilder.enableEndpointDiscovery();
+    } else {
+      queryClientBuilder.disableEndpointDiscovery();
+    }
 
     final Object endpoint = info.get(TimestreamConnectionProperty.ENDPOINT.getConnectionProperty());
 
