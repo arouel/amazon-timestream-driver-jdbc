@@ -309,13 +309,21 @@ public class TimestreamConnection implements java.sql.Connection {
       throw Error.createSQLException(LOGGER, Error.INVALID_TIMEOUT, timeout);
     }
 
+    final AmazonTimestreamQuery client = this.getQueryClientBuilder()
+        .withClientConfiguration(
+            new ClientConfiguration(queryClientBuilder.getClientConfiguration())
+                .withConnectionTimeout(timeout * 1000))
+        .build();
+
     // Issue a query to validate the actual connection.
     try {
-      queryClient.query(new QueryRequest().withQueryString("SELECT 1"));
+      client.query(new QueryRequest().withQueryString("SELECT 1"));
       return true;
     } catch (Exception e) {
       LOGGER.error("Connection is no longer valid: {}", e.getMessage());
       return false;
+    } finally {
+      client.shutdown();
     }
   }
 
