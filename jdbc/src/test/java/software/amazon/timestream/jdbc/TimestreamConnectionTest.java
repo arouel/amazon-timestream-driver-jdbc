@@ -793,16 +793,16 @@ class TimestreamConnectionTest {
     properties.put(TimestreamConnectionProperty.MAX_RETRY_COUNT.getConnectionProperty(), "1000");
     properties.put(TimestreamConnectionProperty.MAX_CONNECTIONS.getConnectionProperty(), "200");
 
-    final MockTimestreamConnection timestreamConnection = new MockTimestreamConnection(
+    try (MockTimestreamConnection timestreamConnection = new MockTimestreamConnection(
       properties,
       mockQueryClient,
       mockQueryClientBuilder,
-      mockHttpClient);
-
-    Assertions.assertEquals(10, timestreamConnection.clientConfiguration.getSocketTimeout());
-    Assertions.assertEquals(12, timestreamConnection.clientConfiguration.getRequestTimeout());
-    Assertions.assertEquals(1000, timestreamConnection.clientConfiguration.getMaxErrorRetry());
-    Assertions.assertEquals(200, timestreamConnection.clientConfiguration.getMaxConnections());
+      mockHttpClient)) {
+		Assertions.assertEquals(10, timestreamConnection.clientConfiguration.getSocketTimeout());
+		Assertions.assertEquals(12, timestreamConnection.clientConfiguration.getRequestTimeout());
+		Assertions.assertEquals(1000, timestreamConnection.clientConfiguration.getMaxErrorRetry());
+		Assertions.assertEquals(200, timestreamConnection.clientConfiguration.getMaxConnections());
+	}
   }
 
   /**

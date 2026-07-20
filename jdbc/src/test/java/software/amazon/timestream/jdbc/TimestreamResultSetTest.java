@@ -352,9 +352,9 @@ class TimestreamResultSetTest {
     final ArgumentCaptor<QueryRequest> requestArgumentCaptor = ArgumentCaptor.forClass(QueryRequest.class);
     Mockito.when(mockQueryClient.query(requestArgumentCaptor.capture())).thenReturn(new QueryResult().withRows(ImmutableList.of(new Row())));
 
-    final TimestreamResultSet result = new TimestreamResultSet(mockStatement, "", firstPage, new HashMap<>(), 0, 0);
-    result.next();
-
+    try (TimestreamResultSet result = new TimestreamResultSet(mockStatement, "", firstPage, new HashMap<>(), 0, 0)) {
+		result.next();
+	}
     final QueryRequest actualRequest = requestArgumentCaptor.getValue();
     if (fetchSize == 0) {
       Assertions.assertNull(actualRequest.getMaxRows());
