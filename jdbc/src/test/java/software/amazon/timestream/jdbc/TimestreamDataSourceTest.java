@@ -335,11 +335,11 @@ class TimestreamDataSourceTest {
 
     // Check if the pool is initialized.
     Assertions.assertEquals(1, mockTimestreamDataSource.availablePools.size());
-    Assertions.assertEquals(0, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
+    Assertions.assertEquals(1, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
 
     // Close the connection and check if the connection was recycled.
     timestreamPooledConnection1.close();
-    Assertions.assertEquals(1, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
+    Assertions.assertEquals(2, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
 
     // Retrieve a connection with the same credential set and make sure its the same one that we have previously received.
     final TimestreamPooledConnection sameTimestreamPooledConnection = (TimestreamPooledConnection) mockTimestreamDataSource
@@ -370,8 +370,8 @@ class TimestreamDataSourceTest {
     timestreamPooledConnection1.close();
     timestreamPooledConnection2.close();
     Assertions.assertEquals(2, mockTimestreamDataSource.availablePools.size());
-    Assertions.assertEquals(1, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
-    Assertions.assertEquals(1, mockTimestreamDataSource.availablePools.get(credentialSet2).size());
+    Assertions.assertEquals(2, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
+    Assertions.assertEquals(2, mockTimestreamDataSource.availablePools.get(credentialSet2).size());
   }
 
   @Test
@@ -390,7 +390,7 @@ class TimestreamDataSourceTest {
     timestreamPooledConnection.close();
     timestreamPooledConnection.close();
     Assertions.assertEquals(1, mockTimestreamDataSource.availablePools.size());
-    Assertions.assertEquals(1, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
+    Assertions.assertEquals(2, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
   }
 
   @Test
@@ -418,7 +418,7 @@ class TimestreamDataSourceTest {
     Mockito.when(mockTimestreamConnection.isClosed()).thenReturn(true);
     timestreamPooledConnection.close();
     // Make sure that it is not recycled.
-    Assertions.assertEquals(0, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
+    Assertions.assertEquals(1, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
   }
 
   @Test

@@ -98,6 +98,7 @@ public class TimestreamDataSource implements javax.sql.DataSource,
         createTimestreamConnection(getProperties(accessKey, secretKey)));
     }
 
+    poolForCredentials.add((TimestreamConnection) timestreamPooledConnection.getConnection());
     timestreamPooledConnection.addConnectionEventListener(this);
     return timestreamPooledConnection;
   }
@@ -694,7 +695,7 @@ public class TimestreamDataSource implements javax.sql.DataSource,
    * @throws SQLException if an empty endpoint is provided or no signing region is provided with the
    *                      endpoint.
    */
-  private Properties getProperties(final String accessKey, final String secretKey)
+  protected Properties getProperties(final String accessKey, final String secretKey)
     throws SQLException {
     final Properties properties = new Properties();
     if (accessKey != null && secretKey != null) {

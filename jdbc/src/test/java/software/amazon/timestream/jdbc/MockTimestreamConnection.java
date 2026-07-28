@@ -48,9 +48,8 @@ class MockTimestreamConnection extends TimestreamConnection {
   }
 
   @Override
-  void buildQueryClientAndVerifyConnection(Properties info,
+  void buildQueryClientAndVerifyConnection(
       AWSCredentialsProvider credentialsProvider) {
-    this.properties = info;
     this.credentialsProvider = credentialsProvider;
   }
 

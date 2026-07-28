@@ -1,3 +1,20 @@
-.idea
 jdbc/src/main/resources/META-INF/THIRD-PARTY-LICENSES.txt
+
+# idea
+.idea
+
+#maven
 target/
+
+*/.gitignore
+
+# Eclipse Files
+.checkstyle
+.classpath
+.project
+.factorypath
+.settings
+.metadata
+.apt_generated
+.apt_generated_tests
+bin/
