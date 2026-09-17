@@ -20,8 +20,6 @@ import com.amazonaws.services.timestreamquery.model.Datum;
 import com.amazonaws.services.timestreamquery.model.Row;
 import com.amazonaws.services.timestreamquery.model.Type;
 import com.google.common.collect.ImmutableList;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -36,7 +34,6 @@ import java.util.regex.Pattern;
  * ResultSet for returning the list of tables in Timestream.
  */
 public class TimestreamColumnsResultSet extends TimestreamBaseResultSet {
-  private static final Logger LOGGER = LoggerFactory.getLogger(TimestreamColumnsResultSet.class);
   private static final Datum NULL_DATUM = new Datum().withNullValue(Boolean.TRUE);
   private static final List<ColumnInfo> COLUMNS = ImmutableList.of(
     TimestreamDataType.createColumnInfo(TimestreamDataType.VARCHAR, "TABLE_CAT"),
@@ -65,9 +62,9 @@ public class TimestreamColumnsResultSet extends TimestreamBaseResultSet {
     TimestreamDataType.createColumnInfo(TimestreamDataType.VARCHAR, "IS_GENERATEDCOLUMN"));
 
   /* Index of table schema value in the resultSet returned from getTables() */
-  private final int TABLE_SCHEM_INDX = 2;
+  private static final int TABLE_SCHEM_INDX = 2;
   /* Index of table name value in the resultSet returned from getTables() */
-  private final int TABLE_NAME_INDX = 3;
+  private static final int TABLE_NAME_INDX = 3;
 
   private final TimestreamStatement statement;
   private ResultSet result;

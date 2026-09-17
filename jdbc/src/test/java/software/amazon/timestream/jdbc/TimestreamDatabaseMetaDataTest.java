@@ -136,7 +136,7 @@ class TimestreamDatabaseMetaDataTest {
     initializeWithResultException();
 
     try {
-      ResultSet resultSet = dbMetaData.getSchemas();
+      dbMetaData.getSchemas();
       Assertions.fail("unexpected success");
     } catch (AmazonTimestreamQueryException ae) {
       Assertions.assertEquals(ae.getErrorMessage(), "access denied");
@@ -178,57 +178,62 @@ class TimestreamDatabaseMetaDataTest {
   @Test
   void testGetColumnsResultMetadata() throws SQLException {
     initializeWithResult();
-    final TimestreamColumnsResultSet tablesResultSet = new TimestreamColumnsResultSet(
-      mockConnection, null, null, null);
-    final ResultSetMetaData expectation = tablesResultSet.getMetaData();
-    try (ResultSet resultSet = dbMetaData
-      .getColumns(null, null, null, null)) {
-      final ResultSetMetaData actual = resultSet.getMetaData();
-      testGetOfColInfo(expectation, actual);
-    }
+    try (TimestreamColumnsResultSet tablesResultSet = new TimestreamColumnsResultSet(
+      mockConnection, null, null, null)) {
+		final ResultSetMetaData expectation = tablesResultSet.getMetaData();
+		try (ResultSet resultSet = dbMetaData
+		  .getColumns(null, null, null, null)) {
+		  final ResultSetMetaData actual = resultSet.getMetaData();
+		  testGetOfColInfo(expectation, actual);
+		}
+	}
   }
 
   @Test
   void testGetImportedKeysOfColInfo() throws SQLException {
-    final TimestreamImportedKeysResultSet importedKeysResultSet = new TimestreamImportedKeysResultSet();
-    final ResultSetMetaData expectation = importedKeysResultSet.getMetaData();
-    try (ResultSet resultSet = dbMetaData
-      .getImportedKeys(null, null, null)) {
-      final ResultSetMetaData actual = resultSet.getMetaData();
-      testGetOfColInfo(expectation, actual);
-    }
+    try (TimestreamImportedKeysResultSet importedKeysResultSet = new TimestreamImportedKeysResultSet()) {
+		final ResultSetMetaData expectation = importedKeysResultSet.getMetaData();
+		try (ResultSet resultSet = dbMetaData
+		  .getImportedKeys(null, null, null)) {
+		  final ResultSetMetaData actual = resultSet.getMetaData();
+		  testGetOfColInfo(expectation, actual);
+		}
+	}
   }
 
   @Test
   void testGetIndexInfoOfColInfo() throws SQLException {
-    final TimestreamIndexResultSet indexResultSet = new TimestreamIndexResultSet();
-    final ResultSetMetaData expectation = indexResultSet.getMetaData();
-    try (ResultSet resultSet = dbMetaData
-      .getIndexInfo(null, null, null, Boolean.TRUE, Boolean.TRUE)) {
-      final ResultSetMetaData actual = resultSet.getMetaData();
-      testGetOfColInfo(expectation, actual);
+    try ( TimestreamIndexResultSet indexResultSet = new TimestreamIndexResultSet()) {
+    	final ResultSetMetaData expectation = indexResultSet.getMetaData();
+    	try (ResultSet resultSet = dbMetaData
+    			.getIndexInfo(null, null, null, Boolean.TRUE, Boolean.TRUE)) {
+    		final ResultSetMetaData actual = resultSet.getMetaData();
+    		testGetOfColInfo(expectation, actual);
+    	}
     }
   }
 
   @Test
   void testGetPrimaryKeysOfColInfo() throws SQLException {
-    final TimestreamPrimaryKeysResultSet primaryKeysResultSet = new TimestreamPrimaryKeysResultSet();
-    final ResultSetMetaData expectation = primaryKeysResultSet.getMetaData();
-    try (ResultSet resultSet = dbMetaData
-      .getPrimaryKeys(null, null, null)) {
-      final ResultSetMetaData actual = resultSet.getMetaData();
-      testGetOfColInfo(expectation, actual);
-    }
+    try (TimestreamPrimaryKeysResultSet primaryKeysResultSet = new TimestreamPrimaryKeysResultSet()) {
+		final ResultSetMetaData expectation = primaryKeysResultSet.getMetaData();
+		try (ResultSet resultSet = dbMetaData
+		  .getPrimaryKeys(null, null, null)) {
+		  final ResultSetMetaData actual = resultSet.getMetaData();
+		  testGetOfColInfo(expectation, actual);
+		}
+	}
   }
 
   @Test
   void testGetTableTypesOfColInfo() throws SQLException {
-    final TimestreamTableTypesResultSet tableTypesResultSet = new TimestreamTableTypesResultSet();
-    final ResultSetMetaData expectation = tableTypesResultSet.getMetaData();
-    try (ResultSet resultSet = dbMetaData.getTableTypes()) {
-      final ResultSetMetaData actual = resultSet.getMetaData();
-      testGetOfColInfo(expectation, actual);
-    }
+    try (TimestreamTableTypesResultSet tableTypesResultSet = new TimestreamTableTypesResultSet()) {
+		final ResultSetMetaData expectation = tableTypesResultSet.getMetaData();
+		try (ResultSet resultSet = dbMetaData.getTableTypes()) {
+		  final ResultSetMetaData actual = resultSet.getMetaData();
+		  testGetOfColInfo(expectation, actual);
+		}
+	}
   }
 
   @Test
@@ -266,14 +271,15 @@ class TimestreamDatabaseMetaDataTest {
   @Test
   void testGetTablesOfColInfo() throws SQLException {
     initializeWithResult();
-    final TimestreamTablesResultSet tablesResultSet = new TimestreamTablesResultSet(
-      mockConnection, null, null, null);
-    final ResultSetMetaData expectation = tablesResultSet.getMetaData();
-    try (ResultSet resultSet = dbMetaData
-      .getTables(null, null, null, null)) {
-      final ResultSetMetaData actual = resultSet.getMetaData();
-      testGetOfColInfo(expectation, actual);
-    }
+    try (TimestreamTablesResultSet tablesResultSet = new TimestreamTablesResultSet(
+      mockConnection, null, null, null)) {
+		final ResultSetMetaData expectation = tablesResultSet.getMetaData();
+		try (ResultSet resultSet = dbMetaData
+		  .getTables(null, null, null, null)) {
+		  final ResultSetMetaData actual = resultSet.getMetaData();
+		  testGetOfColInfo(expectation, actual);
+		}
+	}
   }
 
   @Test
@@ -322,12 +328,13 @@ class TimestreamDatabaseMetaDataTest {
 
   @Test
   void testGetTypeInfoOfColInfo() throws SQLException {
-    final TimestreamTypeInfoResultSet typeInfoResultSet = new TimestreamTypeInfoResultSet();
-    final ResultSetMetaData expectation = typeInfoResultSet.getMetaData();
-    try (ResultSet resultSet = dbMetaData.getTypeInfo()) {
-      final ResultSetMetaData actual = resultSet.getMetaData();
-      testGetOfColInfo(expectation, actual);
-    }
+    try (TimestreamTypeInfoResultSet typeInfoResultSet = new TimestreamTypeInfoResultSet()) {
+		final ResultSetMetaData expectation = typeInfoResultSet.getMetaData();
+		try (ResultSet resultSet = dbMetaData.getTypeInfo()) {
+		  final ResultSetMetaData actual = resultSet.getMetaData();
+		  testGetOfColInfo(expectation, actual);
+		}
+	}
   }
 
   @ParameterizedTest
@@ -341,12 +348,13 @@ class TimestreamDatabaseMetaDataTest {
 
   @Test
   void testGetClientInfoPropertiesOfColInfo() throws SQLException {
-    final TimestreamPropertiesResultSet clientInfoResultSet = new TimestreamPropertiesResultSet();
-    final ResultSetMetaData expectation = clientInfoResultSet.getMetaData();
-    try (ResultSet resultSet = dbMetaData.getClientInfoProperties()) {
-      final ResultSetMetaData actual = resultSet.getMetaData();
-      testGetOfColInfo(expectation, actual);
-    }
+    try (TimestreamPropertiesResultSet clientInfoResultSet = new TimestreamPropertiesResultSet()) {
+		final ResultSetMetaData expectation = clientInfoResultSet.getMetaData();
+		try (ResultSet resultSet = dbMetaData.getClientInfoProperties()) {
+		  final ResultSetMetaData actual = resultSet.getMetaData();
+		  testGetOfColInfo(expectation, actual);
+		}
+	}
   }
 
   /**

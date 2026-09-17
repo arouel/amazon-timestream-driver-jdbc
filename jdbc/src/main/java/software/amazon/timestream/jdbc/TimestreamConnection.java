@@ -570,6 +570,15 @@ public class TimestreamConnection implements java.sql.Connection {
       .withClientConfiguration(
         new ClientConfiguration(this.queryClientBuilder.getClientConfiguration()));
 
+    Object enableEndpointDiscoveryObject = connectionProperties.get("enableEndpointDiscovery");
+    if (enableEndpointDiscoveryObject != null) {
+    	if (Boolean.parseBoolean(enableEndpointDiscoveryObject.toString())) {
+    		queryClientBuilder.enableEndpointDiscovery();
+    	} else {
+    		queryClientBuilder.disableEndpointDiscovery();
+    	}
+    }
+
     final String region = this.queryClientBuilder.getRegion();
     if (region != null) {
       client.setRegion(region);
@@ -612,15 +621,23 @@ public class TimestreamConnection implements java.sql.Connection {
    * @throws SQLException if a Timestream service endpoint is specified without a signing region.
    */
   void buildQueryClientAndVerifyConnection(
-    final Properties info,
     final AWSCredentialsProvider credentialsProvider) throws SQLException {
     this.queryClientBuilder = AmazonTimestreamQueryClient
       .builder()
       .withClientConfiguration(this.clientConfiguration);
 
-    final Object endpoint = info.get(TimestreamConnectionProperty.ENDPOINT.getConnectionProperty());
+    Object enableEndpointDiscoveryObject = connectionProperties.get("enableEndpointDiscovery");
+    if (enableEndpointDiscoveryObject != null) {
+    	if (Boolean.parseBoolean(enableEndpointDiscoveryObject.toString())) {
+    		queryClientBuilder.enableEndpointDiscovery();
+    	} else {
+    		queryClientBuilder.disableEndpointDiscovery();
+    	}
+    }
 
-    Object region = info.get(TimestreamConnectionProperty.REGION.getConnectionProperty());
+    final Object endpoint = connectionProperties.get(TimestreamConnectionProperty.ENDPOINT.getConnectionProperty());
+
+    Object region = connectionProperties.get(TimestreamConnectionProperty.REGION.getConnectionProperty());
 
     if (endpoint != null) {
       if (region == null) {
@@ -750,7 +767,7 @@ public class TimestreamConnection implements java.sql.Connection {
   private void initializeClients(Properties info, CloseableHttpClient httpClient) throws SQLException {
     LOGGER.info("Initializing the client.");
     configureSdkOptions(info, this.clientConfiguration);
-    buildQueryClientAndVerifyConnection(info, createCustomCredentialsProvider(info, httpClient));
+    buildQueryClientAndVerifyConnection(createCustomCredentialsProvider(info, httpClient));
     metadataPreparedStatementEnabled = Boolean.parseBoolean(info
         .getOrDefault(TimestreamConnectionProperty.ENABLE_METADATA_PREPARED_STATEMENT.getConnectionProperty(),
             TimestreamConnectionProperty.ENABLE_METADATA_PREPARED_STATEMENT.getDefaultValue())

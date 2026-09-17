@@ -77,7 +77,7 @@ public class TimestreamDataSource implements javax.sql.DataSource,
   }
 
   @Override
-  public PooledConnection getPooledConnection(String accessKey, String secretKey)
+  public synchronized PooledConnection getPooledConnection(String accessKey, String secretKey)
     throws SQLException {
     final Properties properties = getProperties(accessKey, secretKey);
     final List<TimestreamConnection> poolForCredentials = availablePools
@@ -668,7 +668,7 @@ public class TimestreamDataSource implements javax.sql.DataSource,
   }
 
   @Override
-  public void connectionClosed(ConnectionEvent event) {
+  public synchronized void connectionClosed(ConnectionEvent event) {
     final TimestreamPooledConnection eventSource = (TimestreamPooledConnection) event.getSource();
     eventSource.removeConnectionEventListener(this);
     final TimestreamConnection connection = (TimestreamConnection) eventSource.getConnection();
@@ -694,7 +694,7 @@ public class TimestreamDataSource implements javax.sql.DataSource,
    * @throws SQLException if an empty endpoint is provided or no signing region is provided with the
    *                      endpoint.
    */
-  private Properties getProperties(final String accessKey, final String secretKey)
+  protected Properties getProperties(final String accessKey, final String secretKey)
     throws SQLException {
     final Properties properties = new Properties();
     if (accessKey != null && secretKey != null) {
