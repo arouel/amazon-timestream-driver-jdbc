@@ -77,7 +77,7 @@ public class TimestreamDataSource implements javax.sql.DataSource,
   }
 
   @Override
-  public PooledConnection getPooledConnection(String accessKey, String secretKey)
+  public synchronized PooledConnection getPooledConnection(String accessKey, String secretKey)
     throws SQLException {
     final Properties properties = getProperties(accessKey, secretKey);
     final List<TimestreamConnection> poolForCredentials = availablePools
@@ -98,7 +98,6 @@ public class TimestreamDataSource implements javax.sql.DataSource,
         createTimestreamConnection(getProperties(accessKey, secretKey)));
     }
 
-    poolForCredentials.add((TimestreamConnection) timestreamPooledConnection.getConnection());
     timestreamPooledConnection.addConnectionEventListener(this);
     return timestreamPooledConnection;
   }
@@ -669,7 +668,7 @@ public class TimestreamDataSource implements javax.sql.DataSource,
   }
 
   @Override
-  public void connectionClosed(ConnectionEvent event) {
+  public synchronized void connectionClosed(ConnectionEvent event) {
     final TimestreamPooledConnection eventSource = (TimestreamPooledConnection) event.getSource();
     eventSource.removeConnectionEventListener(this);
     final TimestreamConnection connection = (TimestreamConnection) eventSource.getConnection();

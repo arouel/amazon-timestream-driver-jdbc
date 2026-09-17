@@ -24,8 +24,16 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
+import javax.sql.PooledConnection;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 class TimestreamDataSourceTest {
 
@@ -335,11 +343,11 @@ class TimestreamDataSourceTest {
 
     // Check if the pool is initialized.
     Assertions.assertEquals(1, mockTimestreamDataSource.availablePools.size());
-    Assertions.assertEquals(1, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
+    Assertions.assertEquals(0, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
 
     // Close the connection and check if the connection was recycled.
     timestreamPooledConnection1.close();
-    Assertions.assertEquals(2, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
+    Assertions.assertEquals(1, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
 
     // Retrieve a connection with the same credential set and make sure its the same one that we have previously received.
     final TimestreamPooledConnection sameTimestreamPooledConnection = (TimestreamPooledConnection) mockTimestreamDataSource
@@ -370,8 +378,8 @@ class TimestreamDataSourceTest {
     timestreamPooledConnection1.close();
     timestreamPooledConnection2.close();
     Assertions.assertEquals(2, mockTimestreamDataSource.availablePools.size());
-    Assertions.assertEquals(2, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
-    Assertions.assertEquals(2, mockTimestreamDataSource.availablePools.get(credentialSet2).size());
+    Assertions.assertEquals(1, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
+    Assertions.assertEquals(1, mockTimestreamDataSource.availablePools.get(credentialSet2).size());
   }
 
   @Test
@@ -390,7 +398,7 @@ class TimestreamDataSourceTest {
     timestreamPooledConnection.close();
     timestreamPooledConnection.close();
     Assertions.assertEquals(1, mockTimestreamDataSource.availablePools.size());
-    Assertions.assertEquals(2, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
+    Assertions.assertEquals(1, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
   }
 
   @Test
@@ -418,7 +426,46 @@ class TimestreamDataSourceTest {
     Mockito.when(mockTimestreamConnection.isClosed()).thenReturn(true);
     timestreamPooledConnection.close();
     // Make sure that it is not recycled.
-    Assertions.assertEquals(1, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
+    Assertions.assertEquals(0, mockTimestreamDataSource.availablePools.get(credentialSet1).size());
+  }
+
+  @Test
+  void testConcurrentPooledConnectionAccess() throws Exception {
+    Mockito.when(mockTimestreamConnection.getConnectionProperties()).thenReturn(credentialSet1);
+    final MockTimestreamDataSource mockTimestreamDataSource = new MockTimestreamDataSource(
+      mockTimestreamConnection);
+    setDataSourceCredentials(mockTimestreamDataSource, credentialSet1);
+
+    final int threadCount = 8;
+    final int iterationsPerThread = 100;
+    final CountDownLatch start = new CountDownLatch(1);
+    final ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+    final List<Future<?>> futures = new ArrayList<>();
+
+    try {
+      for (int i = 0; i < threadCount; i++) {
+        futures.add(executor.submit(() -> {
+          start.await();
+          for (int iteration = 0; iteration < iterationsPerThread; iteration++) {
+            final PooledConnection pooledConnection = mockTimestreamDataSource
+              .getPooledConnection();
+            pooledConnection.close();
+          }
+          return null;
+        }));
+      }
+
+      start.countDown();
+      for (Future<?> future : futures) {
+        future.get();
+      }
+    } finally {
+      executor.shutdownNow();
+      Assertions.assertTrue(executor.awaitTermination(10, TimeUnit.SECONDS));
+    }
+
+    Assertions.assertTrue(
+      mockTimestreamDataSource.availablePools.get(credentialSet1).size() <= threadCount);
   }
 
   @Test
